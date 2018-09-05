@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import datetime
 import concurrent.futures
 import requests
 import collections
@@ -82,6 +82,24 @@ def get_info_db(sql,addr,version=0,date='1990-01-01'):
 def alarm(msg):
     pass
 
+def write_db(url,response,dt):
+    query = "INSERT INTO api_snapshot (url,response,create_time) " \
+            "VALUES(%s,%s,%s)"
+    args = (url,response,dt)
+    try:
+        
+ 
+        cursor = conn.cursor()
+        cursor.execute(query, args)
+ 
+        if cursor.lastrowid:
+            print('last insert id', cursor.lastrowid)
+        else:
+            print('last insert id not found')
+ 
+        conn.commit()
+    except Error as error:
+        print(error)
 def handle_response(response,url):
     # TODO implement your logics here !!!
     query="select content, createtime from APISnapshot where url='"+url+"' order by createtime desc"
@@ -89,12 +107,21 @@ def handle_response(response,url):
     cursor.execute(sql)
     result = cursor.fetchone
     if result != response:
-                "insert into APISnapshot values('"+url+"','"+response+"',"+datenow()+")"
+                write_db(url,response,datetime.datetime.now())
                 alarm(response - result)
 
 
     get_infodb_()
     print ("response")
+
+def init_database(urls):
+    for url in urls:
+        response = session.get(url)
+        if response.status_code == 200:
+            write_db(url,response,dt):
+
+
+    pass
 
 # Retrieve a single page and report the URL and contents
 def load_url(session, url):
@@ -115,7 +142,7 @@ def init_requests():
 config = configparser.ConfigParser()
 config.read('dbconfig.ini')
 db_connect(config)
-URLS = ReadGoogle.ReadGoogle(config['G']['sheetid'],'exchange')
+URLS = ReadGoogle.ReadGoogle(config['G']['sheetid'],'exchange',0,1)
 
 # We can use a with statement to ensure threads are cleaned up promptly
 with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor, init_requests() as session:
