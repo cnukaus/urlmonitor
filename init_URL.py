@@ -46,21 +46,23 @@ def write_db(url,response,dt,version,conn):
     except Error as error:
         print(error)
 def init_database(session,urls,dbconn):
-    for url in urls:
-        raw_response=session.get(url[0])
-        if len(url)>1 and len(url[1])>0:
-            response = raw_response.content[raw_response.find(url[1])+len(url[1]):]
-        else:
-            response=raw_response.content
+    try:
+        for url in urls:
+            raw_response=session.get(url[0])
+            if len(url)>1 and len(url[1])>0:
+                response = raw_response.content[raw_response.find(url[1])+len(url[1]):]
+            else:
+                response=raw_response.content
 
-        
-        #ok binance but not huobi, #response = req.urlopen(url)
-        print(response)
-        if raw_response.status_code == 200:
-                write_db(url[0],response,datetime.datetime.now(),0,dbconn)
+            
+            #ok binance but not huobi, #response = req.urlopen(url)
+            print(len(response))
+            if raw_response.status_code == 200:
+                    write_db(url[0],response,datetime.datetime.now(),0,dbconn)
 
 
-    pass
+    except Exception as err:
+        print (err)
 
 # Retrieve a single page and report the URL and contents
 def load_url(session, url):
