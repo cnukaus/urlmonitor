@@ -28,6 +28,8 @@ def init_requests():
     return session
 
 def write_db(url,response,dt,version,conn):
+    query0 = "UPDATE api_snapshot set version=NULL where url=%s"
+    args0 =(url,)
     query = "INSERT INTO api_snapshot (url,response,create_time,version) " \
             "VALUES(%s,%s,%s,%s)"
     args = (url,response,dt,version)
@@ -35,6 +37,10 @@ def write_db(url,response,dt,version,conn):
         
  
         cursor = conn.cursor()
+        cursor.execute(query0, args0)
+ 
+        conn.commit()
+        
         cursor.execute(query, args)
  
         if cursor.lastrowid:
