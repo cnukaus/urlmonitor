@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import json
 from pprint import pprint
 import ast
@@ -27,9 +27,8 @@ def parsejson(content,url):
 
 		#for item in value2['data']:
 		#	pprint(item["symbol"])
-		return str(value2['data'])#value2['data']
+		return str([item["symbol"] for item in value2['data']])#value2['data']
 
-	#bilaxy
 	if "huobi".upper() in  url.upper():
 
 		value2 = ast.literal_eval(content)#'{"code":"200","data":[{"symbol":16,"high":"0.021"}]}') a dictionary with 2 pairs, pair 2 is another list of json dicts
@@ -44,7 +43,7 @@ def parsejson(content,url):
 		
 		#for item in value2['data'].keys():
 		#	print(item)
-		return str(value2['data'].keys())
+		return str(sorted(list(value2['data'].keys())))
 
 	#https://api.kucoin.com/v1/market/open/symbols
 	## 这里可以先使用type(result_mid)看一下它是不是一个unicode，如果是的话再用encode转成你想要的编码
