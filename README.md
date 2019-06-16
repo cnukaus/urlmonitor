@@ -1,4 +1,11 @@
 # urlmonitor
+## also can use GoogleSheets function to parse page directly such as ethereum address
+
+Google Sheets直接解析：
+=CONCATENATE("https://etherscan.io/address/",B2,"#code")
+=IMPORTxml(E2,"//div/span[@class='h6 font-weight-bold mb-0'")
+
+
 detecting changes of a webpage and store to database
 
 run Urlpool_master.py
