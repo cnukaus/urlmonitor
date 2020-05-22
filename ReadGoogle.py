@@ -5,7 +5,7 @@ from oauth2client.file import Storage
 import os
 import httplib2
 
-def get_credentials():
+def get_credentials(SCOPES,CLIENT_SECRET_FILE,APPLICATION_NAME):
     """Gets valid user credentials from storage.
 
     If nothing has been stored, or if the stored credentials are invalid,
@@ -42,7 +42,7 @@ def ReadGoogle(ID,start_column,end_column,sheetname='Sheet1'):
 	CLIENT_SECRET_FILE = 'client_secret.json'
 	APPLICATION_NAME = 'Google Sheets API Python Quickstart'
 	rangeName =sheetname+"!A1:E"#for row in rows:
-	credentials = get_credentials()
+	credentials = get_credentials(SCOPES,CLIENT_SECRET_FILE,APPLICATION_NAME)
 	http = credentials.authorize(httplib2.Http())
 	discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?'
 	                'version=v4')
