@@ -4,17 +4,16 @@ import concurrent.futures
 import requests
 import queue
 import threading
-
 import datetime
 import ReadGoogle
 import urllib.request as req
 import mysql.connector
-from mysql.connector import Error
 import configparser
-
 import json_parse
+from mysql.connector import Error
+from warnings import warn
 
-
+warnings.warn(DeprecationWarning("test.py has been deprecated"), stacklevel=2)
 
 # Time interval (in seconds)
 INTERVAL = 0.25 * 60
@@ -38,34 +37,26 @@ HEADERS = {
 
 ############################
 def db_connect(config):
-    #https://stackoverflow.com/questions/42906665/import-my-database-connection-with-python
-    
-
+    # see https://stackoverflow.com/questions/42906665/import-my-database-connection-with-python
     try:
-        
         dbconn = mysql.connector.connect(host = config['mysqlDB']['host'],
-                           database = config['mysqlDB']['database'],user = config['mysqlDB']['user'],
-                           password = config['mysqlDB']['password']
-                           )
-
-       
-        
-    
+                                             database = config['mysqlDB']['database'],user = config['mysqlDB']['user'],
+                                             password = config['mysqlDB']['password']
+                                        )
     except Exception as err:
-        print ("exception"+err)
+        print("exception"+err)
     if dbconn.is_connected():
-            print('Connected to MySQL database')
-            return dbconn
-    
+        print('Connected to MySQL database')
+        return dbconn
 
 def handle_response(response,url,dbconn):
     print("handle")
-    query="select response, create_time from api_snapshot where url='"+url+"' and version=0 order by create_time desc"
+    query = "SELECT response, create_time FROM api_snapshot WHERE url='"+url+"' AND version=0 ORDER BY create_time DESC"
     cursor = dbconn.cursor()
     cursor.execute(query)
     result = cursor.fetchone()
     if result is not None:
-        #print('%s' %response,create_date )# %(response,create_time))
+        # print('%s' %response,create_date )# %(response,create_time))
         print("old value"+result[0][:20])
         print(response[:20])
         if result[0] != response:
@@ -104,35 +95,33 @@ def get_info_db(sql,addr,dbconn,version=0,date='1990-01-01'):
 
     pass
     return balance
-def alarm(msg,msg2):
-    print("alarm")
-    pass
+def alarm(msg,msg2=None, extra=None):
+    print(f"alarm with msg{'2' if extra else ''} str():")
+    print(msg)
+    print("and repr():")
+    print(repr(msg))
+    if msg2 is not None:
+        alarm(msg2, extra=True)
+    print("" if extra else "alarm() done")
 
 def write_db(url,response,dt,version,conn):
     query0 = "UPDATE api_snapshot set version=NULL where url=%s"
     args0 =(url,)
-    query = "INSERT INTO api_snapshot (url,response,create_time,version) " \
-            "VALUES(%s,%s,%s,%s)"
-    args = (url,response,dt,version)
-
+    query = ("INSERT INTO api_snapshot (url,response,create_time,version) "
+            "VALUES(%s,%s,%s,%s)")
+    args = (url, response, dt, version)
     try:
-        
- 
-        print (query0+str(url))
+        print(query0 + str(url))
         cursor = conn.cursor(buffered=True) #bug as init_URL didn't require buffered
         cursor.execute(query0, args0)
- 
-        
         print("overwrite verion")
         cursor.execute(query, args)
         conn.commit()
         print("writedb")
- 
         if cursor.lastrowid:
             print('last insert id', cursor.lastrowid)
         else:
             print('last insert id not found')
- 
         conn.commit()
     except Error as error:
         print("write Db err:"+str(error))
@@ -158,36 +147,41 @@ def Session():
     session.headers.update(HEADERS)
     return session
 
+def _main():
+    config = configparser.ConfigParser()
+    config.read('dbconfig.ini')
+    dbconn=db_connect(config)
+    #load_url(Session(),'https://api.coinex.com/v1/market/list',dbconn)
+    return load_url(Session(),'https://api.kucoin.com/v1/market/open/symbols',dbconn)
 
-config = configparser.ConfigParser()
-config.read('dbconfig.ini')
-dbconn=db_connect(config)
-#load_url(Session(),'https://api.coinex.com/v1/market/list',dbconn)
-load_url(Session(),'https://api.kucoin.com/v1/market/open/symbols',dbconn)
-'''URLS = ReadGoogle.ReadGoogle(config['G']['sheetid'],0,1,'exchange')
+if __name__ == "__main__":
+    url = _main()
+    print("DONE")
 
-print (URLS)
+# TODO: remove once not necessary or obsolete
 
-# We can use a with statement to ensure threads are cleaned up promptly
-with ThreadPoolExecutor() as executor, Session() as session:
-    if not URLS:
-        raise RuntimeError('Please fill in the array `URLS` to start probing!')
-
-    tasks = queue.Queue()
-
-    for urlArray in URLS:
-        url=urlArray[0]
-        print(url)
-        tasks.put_nowait(url)
-
-    def wind_up(url):
-        #print('wind_up(url={})'.format(url))
-        tasks.put(url)
-
-    while True:
-        url = tasks.get()
-
-        # Work
-        executor.submit(load_url, session, url,dbconn)
-
-        threading.Timer(interval=INTERVAL, function=wind_up, args=(url,)).start()'''
+#$REMOVED$:URLS = ReadGoogle.ReadGoogle(config['G']['sheetid'],0,1,'exchange')
+#$REMOVED$:
+#$REMOVED$:print (URLS)
+#$REMOVED$:
+#$COMMENT$:We can use a with statement to ensure threads are cleaned up promptly
+#$REMOVED$:with ThreadPoolExecutor() as executor, Session() as session:
+#$REMOVED$:    if not URLS:
+#$REMOVED$:        raise RuntimeError('Please fill in the array `URLS` to start probing!')
+#$REMOVED$:
+#$REMOVED$:    tasks = queue.Queue()
+#$REMOVED$:
+#$REMOVED$:    for urlArray in URLS:
+#$REMOVED$:        url=urlArray[0]
+#$REMOVED$:        print(url)
+#$REMOVED$:        tasks.put_nowait(url)
+#$REMOVED$:
+#$REMOVED$:    def wind_up(url):
+#$REMOVED$:        #print('wind_up(url={})'.format(url))
+#$REMOVED$:        tasks.put(url)
+#$REMOVED$:
+#$REMOVED$:    while True:
+#$REMOVED$:        url = tasks.get()
+#$COMMENT$:        Work
+#$REMOVED$:        executor.submit(load_url, session, url,dbconn)
+#$REMOVED$:        threading.Timer(interval=INTERVAL, function=wind_up, args=(url,)).start()
