@@ -1,16 +1,19 @@
 # urlmonitor
-## also can use GoogleSheets function to parse page directly such as ethereum address
+
+
+run Urlpool_master.py and config json files, allows you to monitor which new listing are added to the crypto exchanges.
+
+Also can use GoogleSheets function to parse page directly such as ethereum address
 
 Google Sheets直接解析：
 =CONCATENATE("https://etherscan.io/address/",B2,"#code")
 =IMPORTxml(E2,"//div/span[@class='h6 font-weight-bold mb-0'")
 
-used Google Oauth client type "Other" created Dec17
+used Google Oauth client type "Other"
 
 
 detecting changes of a webpage and store to database
 
-run Urlpool_master.py
 
 Just need to config your own dbconfig.ini file for connectivity
 
